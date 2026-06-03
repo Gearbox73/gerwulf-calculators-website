@@ -1,0 +1,12 @@
+﻿# Development files
+*.ps1
+DEPLOY-TO-GERWULF.md
+EASY-SETUP.ps1
+GITHUB-PAGES-SETUP.md
+QUICK-CHECKLIST.md
+START-HERE-SIMPLE.md
+VISUAL-GUIDE.md
+
+# OS files
+.DS_Store
+Thumbs.db
