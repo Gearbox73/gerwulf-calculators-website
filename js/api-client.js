@@ -10,12 +10,13 @@ async function callSpatialApi() {
         return isNaN(val) ? null : val;
     };
 
-    // Audit Fix: Property names now match C# SpatialRequest Record exactly
+    // Convert HTML select value ("Opt1", "Opt2", etc.) to integer for API
+    // The Azure API expects Table as integer (0-6), not string
+    // MAUI app's PostAsJsonAsync serializes enums as integers by default
     const tableElement = document.getElementById('tableSelect');
-    const tableValue = tableElement?.value;  // This is "Opt1", "Opt2", etc.
+    const tableValueStr = tableElement?.value;  // "Opt1", "Opt2", etc.
 
-    // Convert string enum to integer (Opt1=0, Opt2=1, etc.) to match .NET JSON serialization
-    const tableMap = {
+    const tableToInt = {
         "Opt1": 0,
         "Opt2": 1,
         "Opt3": 2,
@@ -24,13 +25,13 @@ async function callSpatialApi() {
         "Opt6": 5,
         "Opt7": 6
     };
-    const tableInt = tableMap[tableValue] ?? 0;
+    const tableValue = tableToInt[tableValueStr] ?? 0;
 
     console.log('🔍 [API-CLIENT DEBUG] tableElement:', tableElement);
-    console.log('🔍 [API-CLIENT DEBUG] tableValue string:', tableValue, '→ mapped to integer:', tableInt);
+    console.log('🔍 [API-CLIENT DEBUG] Table string:', tableValueStr, '→ integer:', tableValue);
 
     const req = {
-        Table: tableInt,  // Send as integer (0-6) to match MAUI app behavior
+        Table: tableValue,  // INTEGER (0-6) to match MAUI PostAsJsonAsync behavior
         IsSprinklered: document.getElementById('sprinkYes').checked,
         IsHighResp: document.getElementById('fireRespHigh').checked, // Matches C# IsHighResp
         FaceArea_m2: getNum('areaFace_m2'),          // Matches C# FaceArea_m2
