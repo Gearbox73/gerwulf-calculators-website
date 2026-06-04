@@ -11,8 +11,13 @@ async function callSpatialApi() {
     };
 
     // Audit Fix: Property names now match C# SpatialRequest Record exactly
+    const tableElement = document.getElementById('tableSelect');
+    const tableValue = tableElement?.value;
+    console.log('🔍 [API-CLIENT DEBUG] tableElement:', tableElement);
+    console.log('🔍 [API-CLIENT DEBUG] tableValue (should be "Opt1", "Opt2", etc.):', tableValue, 'type:', typeof tableValue);
+
     const req = {
-        Table: document.getElementById('tableSelect')?.value,  // Send raw string like MAUI: "Opt1", "Opt2", etc.
+        Table: tableValue,  // Send raw string like MAUI: "Opt1", "Opt2", etc.
         IsSprinklered: document.getElementById('sprinkYes').checked,
         IsHighResp: document.getElementById('fireRespHigh').checked, // Matches C# IsHighResp
         FaceArea_m2: getNum('areaFace_m2'),          // Matches C# FaceArea_m2
