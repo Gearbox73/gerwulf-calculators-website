@@ -12,12 +12,25 @@ async function callSpatialApi() {
 
     // Audit Fix: Property names now match C# SpatialRequest Record exactly
     const tableElement = document.getElementById('tableSelect');
-    const tableValue = tableElement?.value;
+    const tableValue = tableElement?.value;  // This is "Opt1", "Opt2", etc.
+
+    // Convert string enum to integer (Opt1=0, Opt2=1, etc.) to match .NET JSON serialization
+    const tableMap = {
+        "Opt1": 0,
+        "Opt2": 1,
+        "Opt3": 2,
+        "Opt4": 3,
+        "Opt5": 4,
+        "Opt6": 5,
+        "Opt7": 6
+    };
+    const tableInt = tableMap[tableValue] ?? 0;
+
     console.log('🔍 [API-CLIENT DEBUG] tableElement:', tableElement);
-    console.log('🔍 [API-CLIENT DEBUG] tableValue (should be "Opt1", "Opt2", etc.):', tableValue, 'type:', typeof tableValue);
+    console.log('🔍 [API-CLIENT DEBUG] tableValue string:', tableValue, '→ mapped to integer:', tableInt);
 
     const req = {
-        Table: tableValue,  // Send raw string like MAUI: "Opt1", "Opt2", etc.
+        Table: tableInt,  // Send as integer (0-6) to match MAUI app behavior
         IsSprinklered: document.getElementById('sprinkYes').checked,
         IsHighResp: document.getElementById('fireRespHigh').checked, // Matches C# IsHighResp
         FaceArea_m2: getNum('areaFace_m2'),          // Matches C# FaceArea_m2
