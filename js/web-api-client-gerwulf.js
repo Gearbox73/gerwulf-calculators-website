@@ -52,14 +52,15 @@ async function callSpatialApi() {
         });
 
         if (!response.ok) {
-            console.error('API call failed:', response.status);
+            console.error('❌ API call failed:', response.status);
             showError('Calculation failed. Please try again.');
             return;
         }
 
         const result = await response.json();
+        console.log('📥 Received nested API response:', result);
 
-        // Update UI with results (uses existing displayResults function)
+        // Update UI with results (uses nested structure from SpatialResult.cs)
         displayResults(result);
 
     } catch (error) {
@@ -71,44 +72,104 @@ async function callSpatialApi() {
 }
 
 function displayResults(result) {
-    // Update non-sprinklered results
-    if (result.maxAreaOfOpenings_m2 !== null && result.maxAreaOfOpenings_m2 !== undefined) {
-        document.getElementById('maxOpen_m2').textContent = result.maxAreaOfOpenings_m2.toFixed(2) + ' m²';
-        document.getElementById('maxOpen_ft2').textContent = result.maxAreaOfOpenings_ft2.toFixed(2) + ' ft²';
-    }
+    console.log('🎨 Displaying results from nested API response...');
 
-    if (result.maxPercOfOpeningsAllowed !== null && result.maxPercOfOpeningsAllowed !== undefined) {
-        document.getElementById('maxPercAllowed').textContent = result.maxPercOfOpeningsAllowed.toFixed(2) + '%';
-    }
+    // ===================================================================
+    // NON-SPRINKLERED RESULTS (from result.NonSprinkler)
+    // ===================================================================
+    if (result.NonSprinkler) {
+        const ns = result.NonSprinkler;
 
-    if (result.percOfOpeningsProvided !== null && result.percOfOpeningsProvided !== undefined) {
-        document.getElementById('percProvided').textContent = result.percOfOpeningsProvided.toFixed(2) + '%';
-    }
+        // Max Opening Area
+        if (ns.MaxOpen_m2 !== null && ns.MaxOpen_m2 !== undefined) {
+            const m2El = document.getElementById('maxOpen_m2');
+            const ft2El = document.getElementById('maxOpen_ft2');
+            if (m2El) m2El.textContent = ns.MaxOpen_m2.toFixed(2) + ' m²';
+            if (ft2El) ft2El.textContent = ns.MaxOpen_ft2.toFixed(2) + ' ft²';
+            console.log('  ✅ Non-sprinkler max opening:', ns.MaxOpen_m2.toFixed(2), 'm²');
+        }
 
-    // Compliance status
-    if (result.compliance !== null && result.compliance !== undefined) {
+        // Max Percentage Allowed (Z Value)
+        if (ns.ZValuePercent !== null && ns.ZValuePercent !== undefined) {
+            const pctEl = document.getElementById('maxPercAllowed');
+            if (pctEl) pctEl.textContent = ns.ZValuePercent.toFixed(2) + '%';
+            console.log('  ✅ Max percentage allowed:', ns.ZValuePercent.toFixed(2), '%');
+        }
+
+        // Actual Percentage Provided
+        if (ns.ActualPct !== null && ns.ActualPct !== undefined) {
+            const actualEl = document.getElementById('percProvided');
+            if (actualEl) actualEl.textContent = ns.ActualPct.toFixed(2) + '%';
+            console.log('  ✅ Actual percentage:', ns.ActualPct.toFixed(2), '%');
+        }
+
+        // Compliance Status (from Pass boolean)
         const complianceEl = document.getElementById('complianceStatus');
         if (complianceEl) {
-            complianceEl.textContent = result.compliance;
-            complianceEl.className = result.compliance === 'Compliant' ? 'status-pass' : 'status-fail';
+            const complianceText = ns.Pass ? 'Compliant' : 'Non-Compliant';
+            complianceEl.textContent = complianceText;
+            complianceEl.className = ns.Pass ? 'status-pass' : 'status-fail';
+            console.log('  ✅ Compliance:', complianceText);
         }
     }
 
-    // Update sprinklered results if available
-    if (result.maxAreaOfOpeningsSprink_m2 !== null && result.maxAreaOfOpeningsSprink_m2 !== undefined) {
-        document.getElementById('maxOpenSprink_m2').textContent = result.maxAreaOfOpeningsSprink_m2.toFixed(2) + ' m²';
-        document.getElementById('maxOpenSprink_ft2').textContent = result.maxAreaOfOpeningsSprink_ft2.toFixed(2) + ' ft²';
-    }
+    // ===================================================================
+    // SPRINKLERED RESULTS (from result.Sprinkler)
+    // ===================================================================
+    if (result.Sprinkler) {
+        const spr = result.Sprinkler;
 
-    if (result.maxPercOfOpeningsAllowedSprink !== null && result.maxPercOfOpeningsAllowedSprink !== undefined) {
-        document.getElementById('maxPercAllowedSprink').textContent = result.maxPercOfOpeningsAllowedSprink.toFixed(2) + '%';
-    }
+        // Max Opening Area (Sprinklered)
+        if (spr.MaxOpenSpr_m2 !== null && spr.MaxOpenSpr_m2 !== undefined) {
+            const m2El = document.getElementById('maxOpenSprink_m2');
+            const ft2El = document.getElementById('maxOpenSprink_ft2');
+            if (m2El) m2El.textContent = spr.MaxOpenSpr_m2.toFixed(2) + ' m²';
+            if (ft2El) ft2El.textContent = spr.MaxOpenSpr_ft2.toFixed(2) + ' ft²';
+            console.log('  ✅ Sprinkler max opening:', spr.MaxOpenSpr_m2.toFixed(2), 'm²');
+        }
 
-    if (result.complianceSprink !== null && result.complianceSprink !== undefined) {
+        // Max Percentage Allowed (Sprinklered)
+        if (spr.MaxPctAllowedSpr !== null && spr.MaxPctAllowedSpr !== undefined) {
+            const pctEl = document.getElementById('maxPercAllowedSprink');
+            if (pctEl) pctEl.textContent = spr.MaxPctAllowedSpr.toFixed(2) + '%';
+            console.log('  ✅ Sprinkler max percentage:', spr.MaxPctAllowedSpr.toFixed(2), '%');
+        }
+
+        // Sprinkler Compliance Status
         const complianceSprinkEl = document.getElementById('complianceStatusSprink');
         if (complianceSprinkEl) {
-            complianceSprinkEl.textContent = result.complianceSprink;
-            complianceSprinkEl.className = result.complianceSprink === 'Compliant' ? 'status-pass' : 'status-fail';
+            const complianceText = spr.Pass ? 'Compliant' : 'Non-Compliant';
+            complianceSprinkEl.textContent = complianceText;
+            complianceSprinkEl.className = spr.Pass ? 'status-pass' : 'status-fail';
+            console.log('  ✅ Sprinkler compliance:', complianceText);
+        }
+    }
+
+    // ===================================================================
+    // CONSTRUCTION REQUIREMENTS (from result.Construction)
+    // ===================================================================
+    if (result.Construction) {
+        const constr = result.Construction;
+
+        // Fire Resistance Rating
+        const fireRatingEl = document.getElementById('fireRating');
+        if (fireRatingEl && constr.FireResistanceRating) {
+            fireRatingEl.textContent = constr.FireResistanceRating;
+            console.log('  ✅ Fire rating:', constr.FireResistanceRating);
+        }
+
+        // Construction Type Required
+        const constructionEl = document.getElementById('constructionType');
+        if (constructionEl && constr.ConstructionRequired) {
+            constructionEl.textContent = constr.ConstructionRequired;
+            console.log('  ✅ Construction required:', constr.ConstructionRequired);
+        }
+
+        // Cladding Required
+        const claddingEl = document.getElementById('cladding');
+        if (claddingEl && constr.CladdingRequired) {
+            claddingEl.textContent = constr.CladdingRequired;
+            console.log('  ✅ Cladding required:', constr.CladdingRequired);
         }
     }
 
