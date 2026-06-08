@@ -705,6 +705,88 @@
 
     <!-- Scripts -->
     <script src="js/api-client.js?v=1780948000"></script>
+
+    <!-- HOTFIX: Override api-client.js to fix CDN cache issue -->
+    <script>
+    (function() {
+        // Save reference to original function if it exists
+        const original_callSpatialApi = window.callSpatialApi;
+
+        // Override with fixed version that wraps result in envelope
+        window.callSpatialApi = async function() {
+            console.log('🚀 [API-CLIENT-HOTFIX] callSpatialApi() invoked');
+
+            const getNum = (id) => {
+                const val = parseFloat(document.getElementById(id)?.value);
+                return isNaN(val) ? null : val;
+            };
+
+            const req = {
+                Table: parseInt(document.getElementById('tableSelect')?.value || 0),
+                IsSprinklered: document.getElementById('sprinkYes')?.checked || false,
+                IsHighResp: document.getElementById('fireRespHigh')?.checked || false,
+                FaceArea_m2: getNum('areaFace_m2'),
+                Openings_m2: getNum('openings_m2'),
+                LimitDistance_m: getNum('limitDist_m'),
+                BuildingWidth_m: getNum('buildingWidth_m'),
+                BuildingHeight_m: getNum('buildingHeight_m'),
+                UseInterpolation: document.getElementById('calcInterpolation')?.checked !== false,
+                IsOpenAirStoreys: document.getElementById('openAirCheck')?.checked || false
+            };
+
+            console.log('📦 [API-CLIENT-HOTFIX] Request payload:', req);
+
+            if (req.FaceArea_m2 === null || req.LimitDistance_m === null) {
+                console.warn('⚠️ [API-CLIENT-HOTFIX] Missing required fields');
+                return;
+            }
+
+            if (typeof window.sendToCSharp === 'function') {
+                console.log('📱 [API-CLIENT-HOTFIX] Using MAUI C# bridge');
+                window.sendToCSharp(req);
+            } else {
+                console.log('🌐 [API-CLIENT-HOTFIX] Using Web HTTP mode');
+                try {
+                    const API_BASE_URL = 'https://spatial-separation-calculator-hagnbnewfbdnh5bq.canadacentral-01.azurewebsites.net';
+                    const response = await fetch(`${API_BASE_URL}/spatial/calculate`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(req)
+                    });
+
+                    console.log('📡 [API-CLIENT-HOTFIX] Response status:', response.status);
+
+                    if (!response.ok) {
+                        console.error('❌ [API-CLIENT-HOTFIX] API call failed:', response.status);
+                        return;
+                    }
+
+                    const result = await response.json();
+                    console.log('✅ [API-CLIENT-HOTFIX] API result:', result);
+
+                    // ✅ FIX: Wrap in envelope to match MAUI bridge format
+                    const envelope = {
+                        command: 'CALC_RESULT',
+                        payload: result
+                    };
+
+                    console.log('📥 [API-CLIENT-HOTFIX] Passing WRAPPED ENVELOPE to receiveFromCSharp()');
+
+                    if (typeof window.receiveFromCSharp === 'function') {
+                        window.receiveFromCSharp(envelope);
+                    } else {
+                        console.error('❌ [API-CLIENT-HOTFIX] receiveFromCSharp function not found!');
+                    }
+                } catch (error) {
+                    console.error('💥 [API-CLIENT-HOTFIX] API call error:', error);
+                }
+            }
+        };
+
+        console.log('✅ [HOTFIX] api-client.js function overridden successfully');
+    })();
+    </script>
+
     <script src="js/app.js?v=1780948000"></script>
     <script src="js/UnprotectedOpeningsCalculator.js?v=1780948000"></script>
     <script src="js/combined-app.js?v=1780948000"></script>
