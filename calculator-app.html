@@ -722,7 +722,7 @@
             };
 
             const req = {
-                Table: parseInt(document.getElementById('tableSelect')?.value || 0),
+                Table: document.getElementById('tableSelect')?.value || 'Opt1',  // Send string enum value
                 IsSprinklered: document.getElementById('sprinkYes')?.checked || false,
                 IsHighResp: document.getElementById('fireRespHigh')?.checked || false,
                 FaceArea_m2: getNum('areaFace_m2'),
@@ -731,7 +731,7 @@
                 BuildingWidth_m: getNum('buildingWidth_m'),
                 BuildingHeight_m: getNum('buildingHeight_m'),
                 UseInterpolation: document.getElementById('calcInterpolation')?.checked !== false,
-                IsOpenAirStoreys: document.getElementById('openAirCheck')?.checked || false
+                IsOpenAirStoreys: document.getElementById('openAirYes')?.checked || false
             };
 
             console.log('📦 [API-CLIENT-HOTFIX] Request payload:', req);
