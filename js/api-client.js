@@ -1,4 +1,5 @@
 ﻿// API Client - Works for both MAUI (C# bridge) and Web (HTTP)
+// Last Updated: 2025-01-08 - Fixed envelope wrapping for web mode
 const API_BASE_URL = 'https://spatial-separation-calculator-hagnbnewfbdnh5bq.canadacentral-01.azurewebsites.net';
 
 async function callSpatialApi() {
