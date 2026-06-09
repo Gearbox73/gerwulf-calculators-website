@@ -908,6 +908,16 @@
     function onCalculationResultReceived(result) {
         console.log("📥 Calculation result received, flag =", window.isResettingUI, "result =", result);
 
+        // Add detailed logging
+        if (result) {
+            console.log("🔍 [RESULT-HANDLER] Result structure:", {
+                NonSprinkler: result.NonSprinkler,
+                Sprinkler: result.Sprinkler,
+                Construction: result.Construction,
+                CombustibleOverride: result.CombustibleOverride
+            });
+        }
+
         if (!result) {
             console.warn("⚠️ Result is NULL!");
             return;
@@ -922,6 +932,14 @@
         const spr = result.Sprinkler;
         const con = result.Construction;
         const comb = result.CombustibleOverride;
+
+        console.log("🔍 [RESULT-HANDLER] Extracted values:", {
+            "ns.MaxOpen_m2": ns?.MaxOpen_m2,
+            "ns.ZValuePercent": ns?.ZValuePercent,
+            "con.FireResistanceRating": con?.FireResistanceRating,
+            "con.ConstructionRequired": con?.ConstructionRequired
+        });
+
         const isSprinkChecked = !!safeEl('sprinkYes')?.checked;
 
         // --- A. NON-SPRINKLER & EGRESS ---

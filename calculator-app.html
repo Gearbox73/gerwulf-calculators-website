@@ -763,6 +763,12 @@
 
                     const result = await response.json();
                     console.log('✅ [API-CLIENT-HOTFIX] API result:', result);
+                    console.log('🔍 [API-CLIENT-HOTFIX] Result breakdown:', {
+                        NonSprinkler: result.NonSprinkler,
+                        Sprinkler: result.Sprinkler,
+                        Construction: result.Construction,
+                        CombustibleOverride: result.CombustibleOverride
+                    });
 
                     // ✅ FIX: Wrap in envelope to match MAUI bridge format
                     const envelope = {
