@@ -735,11 +735,19 @@
             };
 
             console.log('📦 [API-CLIENT-HOTFIX] Request payload:', req);
+            console.log('🔍 [API-CLIENT-HOTFIX] Key values:', {
+                Table: req.Table,
+                FaceArea: req.FaceArea_m2,
+                LimitDistance: req.LimitDistance_m,
+                Openings: req.Openings_m2
+            });
 
             if (req.FaceArea_m2 === null || req.LimitDistance_m === null) {
-                console.warn('⚠️ [API-CLIENT-HOTFIX] Missing required fields');
+                console.warn('⚠️ [API-CLIENT-HOTFIX] Missing required fields - FaceArea:', req.FaceArea_m2, 'LimitDistance:', req.LimitDistance_m);
                 return;
             }
+
+            console.log('✅ [API-CLIENT-HOTFIX] Validation passed, calling API...');
 
             if (typeof window.sendToCSharp === 'function') {
                 console.log('📱 [API-CLIENT-HOTFIX] Using MAUI C# bridge');
@@ -756,12 +764,10 @@
 
                     console.log('📡 [API-CLIENT-HOTFIX] Response status:', response.status);
 
-                    if (!response.ok) {
-                        console.error('❌ [API-CLIENT-HOTFIX] API call failed:', response.status);
-                        return;
-                    }
+                    const responseText = await response.text();
+                    console.log('📄 [API-CLIENT-HOTFIX] Raw response:', responseText);
 
-                    const result = await response.json();
+                    const result = JSON.parse(responseText);
                     console.log('✅ [API-CLIENT-HOTFIX] API result:', result);
                     console.log('🔍 [API-CLIENT-HOTFIX] Result breakdown:', {
                         NonSprinkler: result.NonSprinkler,
